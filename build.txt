@@ -1,0 +1,4 @@
+displayName = HolidayLib
+author = Tyfyter
+version = 0.1
+side = NoSync

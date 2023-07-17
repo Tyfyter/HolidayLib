@@ -1,0 +1,1 @@
+HolidayLib exists to let mods forcibly activate holiday events that the vanilla game does not feature, regardless of which mod adds them
