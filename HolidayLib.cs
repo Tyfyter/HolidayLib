@@ -132,9 +132,14 @@ namespace HolidayLib {
 	public class CheckHolidayCommand : ModCommand {
 		public override string Command => "checkholiday";
 		public override CommandType Type => CommandType.Chat;
-
 		public override void Action(CommandCaller caller, string input, string[] args) {
-			
+			input = input.Substring(Command.Length + 2);
+			if (ModContent.GetInstance<HolidayLib>().GetHoliday(input) is Holiday holiday) {
+				caller.Reply(input + (holiday.IsActive ? " is active" : " is not active"));
+			} else {
+				caller.Reply($"No such holiday \"{input}\" has been added", Color.Firebrick);
+			}
+
 		}
 	}
 	public class Holiday {
@@ -154,6 +159,8 @@ namespace HolidayLib {
 			get {
 				DateTime today = DateTime.Today;
 				int sway = 0;
+				DateRanges ??= new();
+				Conditions ??= new();
 				for (int i = 0; i < Conditions.Count; i++) {
 					sway += Conditions[i]();
 				}
