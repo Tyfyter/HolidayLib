@@ -1,1 +1,23 @@
-HolidayLib exists to let mods forcibly activate holiday events that the vanilla game does not feature, regardless of which mod adds them
+HolidayLib exists to let mods forcibly activate holiday events that the vanilla game does not feature, regardless of which mod adds them, this potential existed for April Fools' Day in 1.4.3 through detouring AprilFools.CheckAprilFools but since that's been removed I made this mod so all the holidays can be manipulated (provided the mods that use them use this mod)
+
+all calls and names/aliases are case-insensitive and ignore spaces and underscores
+Call documentation:
+ADDHOLIDAY: adds a holiday or merges range/conditions into existing holiday
+ADDHOLIDAY <name: string> <day: DateTime (ignores year and time)>
+ADDHOLIDAY <name: string> <start: DateTime (ignores year and time)> <end: DateTime (ignores year and time)>
+ADDHOLIDAY <name: string> <start: DateTime (ignores year and time)> <duration: int (duration in days)>
+ADDHOLIDAY <name: string> <dateRanges: params HolidayLib.DateRange[]>
+ADDHOLIDAY <name: string> <conditions: params Func<int>[] (if the sum of the return value of all conditions is > 0 holiday is active regardless of date, if < 0 holiday is inactive regardless of date)>
+
+ADDALIAS: adds one or more aliases to a holiday
+ADDALIAS <name: string> <aliases: params string[]>
+ADDALIASES <name: string> <aliases: params string[]>
+
+ISACTIVE: returns whether or not a holiday is currently active
+ISACTIVE <name: string>
+
+GETACTIVELOOKUP: returns a function that returns whether or not a holiday is currently active
+GETACTIVELOOKUP <name: string>
+
+HELP: returns the string "See description for documentation"
+HELP
