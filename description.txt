@@ -2,14 +2,14 @@ HolidayLib exists to let mods forcibly activate holiday events that the vanilla 
 
 all calls and names/aliases are case-insensitive and ignore spaces and underscores
 Call documentation:
-ADDHOLIDAY: adds a holiday or merges range/conditions into existing holiday
+ADDHOLIDAY: adds a holiday or merges range/conditions into existing holiday, returns a reference to the added holiday, or an ArgumentException if the arguments are formatted incorrectly
 ADDHOLIDAY <name: string> <day: DateTime (ignores year and time)>
 ADDHOLIDAY <name: string> <start: DateTime (ignores year and time)> <end: DateTime (ignores year and time)>
 ADDHOLIDAY <name: string> <start: DateTime (ignores year and time)> <duration: int (duration in days)>
 ADDHOLIDAY <name: string> <dateRanges: params HolidayLib.DateRange[]>
 ADDHOLIDAY <name: string> <conditions: params Func<int>[] (if the sum of the return value of all conditions is > 0 holiday is active regardless of date, if < 0 holiday is inactive regardless of date)>
 
-ADDALIAS: adds one or more aliases to a holiday
+ADDALIAS: adds one or more aliases to a holiday, returns null
 ADDALIAS <name: string> <aliases: params string[]>
 ADDALIASES <name: string> <aliases: params string[]>
 
@@ -18,6 +18,15 @@ ISACTIVE <name: string>
 
 GETACTIVELOOKUP: returns a function that returns whether or not a holiday is currently active
 GETACTIVELOOKUP <name: string>
+
+HOLIDAYFORCECHANGED: increments a counter to allow mods to check if the holiday has been changed, returns the new value
+HOLIDAYFORCECHANGED
+
+FORCEDHOLIDAYVERSION: returns the current value of the counter incremented by HOLIDAYFORCECHANGED
+FORCEDHOLIDAYVERSION
+
+GETFUNC: returns a Func<object[], object> to call the specified call directly
+GETFUNC <callName: string>
 
 HELP: returns the string "See description for documentation"
 HELP

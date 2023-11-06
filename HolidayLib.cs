@@ -11,6 +11,7 @@ namespace HolidayLib {
 	public class HolidayLib : Mod {
 		List<Holiday> holidays;
 		MethodInfo _IsActive;
+		int holidayVersion;
 		public static class Months {
 			public const int January   = 1;
 			public const int February  = 2;
@@ -48,43 +49,76 @@ namespace HolidayLib {
 		}
 		public override object Call(params object[] args) {
 			string command = FormatForComparison(args[0].ToString());
-			string name = args[1] as string;
-			Holiday holiday;
+			bool callFunc = true;
+			if (command == "GETFUNC") {
+				callFunc = false;
+				command = FormatForComparison(args[1].ToString());
+			}
+			Func<object[], object> func;
 			switch (command) {
 				case "ADDHOLIDAY":
-				if (args[2] is DateTime start) {
-					if (args.Length < 4) {
-						AddHoliday(name, new DateRange((start.Month, start.Day)));
-					} else if (args[3] is DateTime end) {
-						AddHoliday(name, new DateRange((start.Month, start.Day), (end.Month, end.Day)));
-					} else if (args[3] is int duration) {
-						AddHoliday(name, new DateRange((start.Month, start.Day), duration));
+				func = (object[] args) => {
+					string name = args[0] as string;
+					if (args[1] is DateTime start) {
+						if (args.Length < 3) {
+							return AddHoliday(name, new DateRange((start.Month, start.Day)));
+						} else if (args[2] is DateTime end) {
+							return AddHoliday(name, new DateRange((start.Month, start.Day), (end.Month, end.Day)));
+						} else if (args[2] is int duration) {
+							return AddHoliday(name, new DateRange((start.Month, start.Day), duration));
+						}
 					}
-				}
-				if (args[2] is DateRange) {
-					AddHoliday(name, args.Skip(2).Where(v => v is DateRange).Select(v => (DateRange)v).ToArray());
-				}
-				if (args[2] is Func<int>) {
-					AddHoliday(name, args.Skip(2).Select(v => v as Func<int>).Where(v => v is not null).ToArray());
-				}
-				goto case "HELP";
+					if (args[1] is DateRange) {
+						return AddHoliday(name, args.Skip(1).Where(v => v is DateRange).Select(v => (DateRange)v).ToArray());
+					}
+					if (args[1] is Func<int>) {
+						return AddHoliday(name, args.Skip(1).Select(v => v as Func<int>).Where(v => v is not null).ToArray());
+					}
+					return new ArgumentException();
+				};
+				break;
 
-				case "ADDALIAS":
-				case "ADDALIASES":
-				AddAliases(name, args.Skip(2).Select(v => v as string).Where(v => v is not null).ToArray());
-				return null;
+				case "ADDALIAS" or "ADDALIASES":
+				func = (object[] args) => {
+					string name = args[0] as string;
+					AddAliases(name, args.Skip(1).Select(v => v as string).Where(v => v is not null).ToArray());
+					return null;
+				};
+				break;
 
 				case "ISACTIVE":
-				return GetHoliday(name).IsActive;
+				func = (object[] args) => {
+					string name = args[0] as string;
+					return GetHoliday(name).IsActive;
+				};
+				break;
 
 				case "GETACTIVELOOKUP":
-				holiday = GetHoliday(name);
-				return holiday.isActiveLookup ??= _IsActive.CreateDelegate<Func<bool>>(holiday);
+				func = (object[] args) => {
+					string name = args[0] as string;
+					Holiday holiday = GetHoliday(name);
+					return holiday.isActiveLookup ??= _IsActive.CreateDelegate<Func<bool>>(holiday);
+				};
+				break;
+
+				case "HOLIDAYFORCECHANGED":
+				func = (object[] args) => {
+					unchecked {
+						return ++holidayVersion;
+					}
+				};
+				break;
+
+				case "FORCEDHOLIDAYVERSION":
+				func = (object[] args) => holidayVersion;
+				break;
 
 				default:
 				case "HELP":
-				return "See description for documentation";
+				func = (object[] args) => "See description for documentation";
+				break;
 			}
+			return callFunc ? func(args.Skip(1).ToArray()) : func;
 		}
 		static string FormatForComparison(string str) => str.ToUpperInvariant().Replace(" ", "").Replace("_", "");
 		public Holiday AddHoliday(string name, params DateRange[] dateRanges) {
@@ -140,6 +174,13 @@ namespace HolidayLib {
 				caller.Reply($"No such holiday \"{input}\" has been added", Color.Firebrick);
 			}
 
+		}
+	}
+	public class CallCommand : ModCommand {
+		public override string Command => "hl-call";
+		public override CommandType Type => CommandType.Chat;
+		public override void Action(CommandCaller caller, string input, string[] args) {
+			caller.Reply(ModContent.GetInstance<HolidayLib>().Call(args)?.ToString() ?? "null");
 		}
 	}
 	public class Holiday {
