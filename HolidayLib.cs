@@ -11,7 +11,7 @@ namespace HolidayLib {
 	public class HolidayLib : Mod {
 		List<Holiday> holidays;
 		MethodInfo _IsActive;
-		int holidayVersion;
+		internal int holidayVersion;
 		public static class Months {
 			public const int January   = 1;
 			public const int February  = 2;
@@ -46,6 +46,18 @@ namespace HolidayLib {
 
 			AddHoliday("Winter Solstice", new DateRange((Months.December, 20), (Months.December, 22)));
 			AddAliases("Winter Solstice", "Hibernal Solstice", "December Solstice");
+		}
+		public override void Load() {
+			On_Main.checkXMas += (orig) => {
+				bool wasXMas = Main.xMas;
+				orig();
+				if (wasXMas != Main.xMas) holidayVersion++;
+			};
+			On_Main.checkHalloween += (orig) => {
+				bool wasHalloween = Main.halloween;
+				orig();
+				if (wasHalloween != Main.halloween) holidayVersion++;
+			};
 		}
 		public override object Call(params object[] args) {
 			string command = FormatForComparison(args[0].ToString());
@@ -163,6 +175,15 @@ namespace HolidayLib {
 			return false;
 		}
 	}
+	public class HolidaySystem : ModSystem {
+		int lastDay = -1;
+		public override void PostUpdateWorld() {
+			if (DateTime.Now.Day != lastDay) {
+				lastDay = DateTime.Now.Day;
+				ModContent.GetInstance<HolidayLib>().holidayVersion++;
+			}
+		}
+	}
 	public class CheckHolidayCommand : ModCommand {
 		public override string Command => "checkholiday";
 		public override CommandType Type => CommandType.Chat;
@@ -173,7 +194,6 @@ namespace HolidayLib {
 			} else {
 				caller.Reply($"No such holiday \"{input}\" has been added", Color.Firebrick);
 			}
-
 		}
 	}
 	public class CallCommand : ModCommand {

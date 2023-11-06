@@ -19,14 +19,14 @@ ISACTIVE <name: string>
 GETACTIVELOOKUP: returns a function that returns whether or not a holiday is currently active
 GETACTIVELOOKUP <name: string>
 
-HOLIDAYFORCECHANGED: increments a counter to allow mods to check if the holiday has been changed, returns the new value
-HOLIDAYFORCECHANGED
+HOLIDAYFORCECHANGED: increments a counter to allow mods to check if the holiday has been changed, returns the new value, should be called whenever a holiday is forced to start or end, or when the state of a holiday which does not begin or end at the beginning of a new day changes
+HOLIDAYFORCECHANGED <no arguments>
 
 FORCEDHOLIDAYVERSION: returns the current value of the counter incremented by HOLIDAYFORCECHANGED
-FORCEDHOLIDAYVERSION
+FORCEDHOLIDAYVERSION <no arguments>
 
 GETFUNC: returns a Func<object[], object> to call the specified call directly
 GETFUNC <callName: string>
 
 HELP: returns the string "See description for documentation"
-HELP
+HELP <no arguments>
