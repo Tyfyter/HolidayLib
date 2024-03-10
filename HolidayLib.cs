@@ -187,6 +187,8 @@ namespace HolidayLib {
 	public class CheckHolidayCommand : ModCommand {
 		public override string Command => "checkholiday";
 		public override CommandType Type => CommandType.Chat;
+		public override string Description => "checks if a holiday is active";
+		public override string Usage => "/checkholiday <holiday name>";
 		public override void Action(CommandCaller caller, string input, string[] args) {
 			input = input.Substring(Command.Length + 2);
 			if (ModContent.GetInstance<HolidayLib>().GetHoliday(input) is Holiday holiday) {
